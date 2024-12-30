@@ -3,12 +3,14 @@ import { ChatMessage } from "./ChatMessage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 export const ChatBox = () => {
   const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean }>>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -26,12 +28,42 @@ export const ChatBox = () => {
     setInputValue("");
     setIsLoading(true);
 
-    // Simulate AI response (replace with actual API call later)
-    setTimeout(() => {
-      const response = `Let me explain "${userMessage}" in a simple way that a 10-year-old would understand...`;
-      setMessages((prev) => [...prev, { text: response, isUser: false }]);
+    try {
+      // Make the webhook call
+      const response = await fetch('https://hook.us2.make.com/az20jqbx0q9jimhqqbmpisyqv5wpkn2s', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message to webhook');
+      }
+
+      const data = await response.json();
+      
+      // Add the response to the chat
+      setMessages((prev) => [...prev, { text: data.response || "I understand! Let me explain that in a simple way...", isUser: false }]);
+    } catch (error) {
+      console.error('Webhook error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+      
+      // Add a fallback response
+      setMessages((prev) => [...prev, { 
+        text: "I'm having trouble right now. Please try again in a moment!", 
+        isUser: false 
+      }]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
