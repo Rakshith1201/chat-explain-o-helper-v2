@@ -86,13 +86,13 @@ export const ChatBox = () => {
   };
 
   return (
-    <div className="flex flex-col h-[600px] bg-chatbox-background rounded-xl shadow-lg">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex flex-col h-[calc(100vh-16rem)] md:h-[600px] bg-white rounded-xl shadow-lg border border-gray-100">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-chatbox-background to-white">
         {messages.map((message, index) => (
           <ChatMessage key={index} message={message.text} isUser={message.isUser} />
         ))}
         {isLoading && (
-          <div className="flex space-x-2 p-4 bg-chatbox-message rounded-xl w-fit">
+          <div className="flex space-x-2 p-4 bg-chatbox-message rounded-xl w-fit animate-fade-in">
             <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
             <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]" />
             <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]" />
@@ -107,9 +107,13 @@ export const ChatBox = () => {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your question here..."
-            className="flex-1"
+            className="flex-1 text-base md:text-sm"
           />
-          <Button onClick={handleSend} disabled={isLoading || !inputValue.trim()}>
+          <Button 
+            onClick={handleSend} 
+            disabled={isLoading || !inputValue.trim()}
+            className="bg-blue-600 hover:bg-blue-700 transition-colors"
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>
