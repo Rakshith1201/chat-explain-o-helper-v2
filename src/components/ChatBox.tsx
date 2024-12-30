@@ -29,7 +29,6 @@ export const ChatBox = () => {
     setIsLoading(true);
 
     try {
-      // Make the webhook call
       const response = await fetch('https://hook.us2.make.com/az20jqbx0q9jimhqqbmpisyqv5wpkn2s', {
         method: 'POST',
         headers: {
@@ -44,10 +43,23 @@ export const ChatBox = () => {
         throw new Error('Failed to send message to webhook');
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let aiResponse;
+      
+      try {
+        // Try to parse as JSON first
+        const jsonResponse = JSON.parse(responseText);
+        aiResponse = jsonResponse.response || jsonResponse;
+      } catch (e) {
+        // If not JSON, use the raw text
+        aiResponse = responseText;
+      }
       
       // Add the response to the chat
-      setMessages((prev) => [...prev, { text: data.response || "I understand! Let me explain that in a simple way...", isUser: false }]);
+      setMessages((prev) => [...prev, { 
+        text: typeof aiResponse === 'string' ? aiResponse : "I understand! Let me explain that in a simple way...", 
+        isUser: false 
+      }]);
     } catch (error) {
       console.error('Webhook error:', error);
       toast({
